@@ -1,0 +1,17 @@
+# Generated routing tiles — rebuild with ./valhalla/build_tiles.sh
+valhalla/tiles/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Env
+.env
+.env.local
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/

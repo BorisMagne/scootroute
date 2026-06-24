@@ -1,0 +1,24 @@
+services:
+  valhalla:
+    image: ghcr.io/valhalla/valhalla:latest
+    container_name: scootroute-valhalla
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./valhalla/tiles:/data
+    # Tiles are prebuilt by ./valhalla/build_tiles.sh into ./valhalla/tiles.
+    # Here we just serve them.
+    command: >
+      valhalla_service /data/valhalla.json 1
+    restart: unless-stopped
+
+  api:
+    build: ./api
+    container_name: scootroute-api
+    ports:
+      - "3000:3000"
+    environment:
+      - VALHALLA_URL=http://valhalla:8002
+    depends_on:
+      - valhalla
+    restart: unless-stopped
