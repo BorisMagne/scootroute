@@ -8,8 +8,6 @@
   <!-- PWA / home-screen install -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#000000">
-
-  <!-- iOS Safari standalone mode -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ScootRoute">
@@ -26,122 +24,161 @@
     }
     .hidden { display: none !important; }
 
-    /* ── Map ──────────────────────────────────────────────────────────── */
     #map { position: absolute; inset: 0; }
 
-    /* MapLibre control theming — adapts to mode via .day-mode on body */
+    /* MapLibre controls */
     .maplibregl-ctrl button { background-color: #1a1a1a !important; }
     .maplibregl-ctrl button .maplibregl-ctrl-icon { filter: invert(.7); }
-    .maplibregl-ctrl {
-      background-color: #1a1a1a !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,.5) !important;
-    }
+    .maplibregl-ctrl { background-color: #1a1a1a !important; box-shadow: 0 2px 8px rgba(0,0,0,.5) !important; }
     .maplibregl-ctrl-attrib { background: rgba(0,0,0,.6) !important; color: #555 !important; }
     .maplibregl-ctrl-attrib a { color: #555 !important; }
+    .maplibregl-ctrl-bottom-right { bottom: 230px !important; right: 12px !important; }
     body.day-mode .maplibregl-ctrl button { background-color: #fff !important; }
     body.day-mode .maplibregl-ctrl button .maplibregl-ctrl-icon { filter: none; }
     body.day-mode .maplibregl-ctrl { background-color: #fff !important; box-shadow: 0 2px 8px rgba(0,0,0,.15) !important; }
-    .maplibregl-ctrl-bottom-right { bottom: 220px !important; right: 12px !important; }
 
-    /* ── Mode toggle button (always top-right) ────────────────────────── */
+    /* ── Mode toggle ──────────────────────────────────────────────── */
     #mode-btn {
       position: absolute; top: max(env(safe-area-inset-top, 0px), 14px); right: 14px;
-      z-index: 25;
-      width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
+      z-index: 25; width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
       background: rgba(10,10,10,.9); backdrop-filter: blur(12px);
-      border: 1px solid #2a2a2a;
-      font-size: 20px; display: flex; align-items: center; justify-content: center;
-      transition: background .2s, border-color .2s;
+      border: 1px solid #2a2a2a; font-size: 20px;
+      display: flex; align-items: center; justify-content: center; transition: opacity .15s;
     }
-    #mode-btn:active { opacity: .75; }
-    body.day-mode #mode-btn {
-      background: rgba(255,255,255,.92);
-      border-color: rgba(0,0,0,.12);
-    }
+    #mode-btn:active { opacity: .7; }
+    body.day-mode #mode-btn { background: rgba(255,255,255,.92); border-color: rgba(0,0,0,.12); }
 
-    /* ── Navigation maneuver card (top) ────────────────────────────── */
+    /* ── Navigation maneuver card ─────────────────────────────────── */
     #nav-card {
       position: absolute; top: 0; left: 0; right: 0; z-index: 20;
-      background: #000;
-      padding: max(env(safe-area-inset-top, 0px), 14px) 18px 16px;
-      box-shadow: 0 6px 24px rgba(0,0,0,.7);
-      cursor: pointer; transition: opacity .2s;
+      background: #000; padding: max(env(safe-area-inset-top, 0px), 14px) 18px 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.7); cursor: pointer; transition: opacity .2s;
     }
     #nav-card:active { opacity: .8; }
     #nav-inner { display: flex; align-items: center; gap: 16px; }
     #nav-icon-wrap {
       width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
-      background: #1a1a1a;
-      display: flex; align-items: center; justify-content: center; font-size: 26px;
+      background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 26px;
     }
     #nav-text { flex: 1; min-width: 0; }
     #nav-instr { font-size: 18px; font-weight: 700; line-height: 1.3; color: #fff; }
     #nav-dist  { font-size: 13px; color: #666; margin-top: 4px; }
-    #nav-advance {
-      font-size: 11px; color: #333; text-align: right; margin-top: 10px;
-      text-transform: uppercase; letter-spacing: .06em;
-    }
+    #nav-advance { font-size: 11px; color: #333; text-align: right; margin-top: 10px;
+      text-transform: uppercase; letter-spacing: .06em; }
     body.day-mode #nav-card { background: #fff; box-shadow: 0 6px 24px rgba(0,0,0,.15); }
     body.day-mode #nav-icon-wrap { background: #f0f0f0; }
     body.day-mode #nav-instr { color: #111; }
     body.day-mode #nav-dist  { color: #aaa; }
     body.day-mode #nav-advance { color: #ccc; }
 
-    /* ── Pick-end hint pill (top centre) ──────────────────────────── */
-    #hint-bar {
-      position: absolute; top: 0; left: 0; right: 0; z-index: 10;
-      padding: max(env(safe-area-inset-top, 0px), 14px) 16px 0;
-      display: flex; justify-content: center; pointer-events: none;
-    }
-    #hint-pill {
-      background: rgba(10,10,10,.88); backdrop-filter: blur(12px);
-      border: 1px solid #2a2a2a; border-radius: 100px;
-      padding: 11px 24px; font-size: 14px; font-weight: 600; color: #fff;
-    }
-    body.day-mode #hint-pill {
-      background: rgba(255,255,255,.92); border-color: rgba(0,0,0,.12); color: #111;
-    }
-
-    /* ── Shared bottom-card base ──────────────────────────────────── */
+    /* ── Shared bottom card ───────────────────────────────────────── */
     .bottom-card {
       position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
       background: #111; border-radius: 22px 22px 0 0;
       box-shadow: 0 -4px 32px rgba(0,0,0,.6);
+      padding: 16px 20px max(env(safe-area-inset-bottom, 0px), 24px);
     }
     body.day-mode .bottom-card { background: #fff; box-shadow: 0 -4px 32px rgba(0,0,0,.12); }
 
-    /* ── Idle card ───────────────────────────────────────────────── */
-    #idle-card {
-      padding: 16px 20px max(env(safe-area-inset-bottom, 0px), 24px);
+    /* ── Search box ───────────────────────────────────────────────── */
+    .card-eyebrow {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: #444; margin-bottom: 12px; text-align: center;
     }
-    #idle-eyebrow {
-      text-align: center; font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .1em; color: #444; margin-bottom: 16px;
-    }
-    body.day-mode #idle-eyebrow { color: #bbb; }
+    body.day-mode .card-eyebrow { color: #bbb; }
 
+    .search-wrap { position: relative; margin-bottom: 10px; }
+    .search-row {
+      display: flex; align-items: center; gap: 10px;
+      background: #1a1a1a; border-radius: 12px; padding: 0 14px; height: 50px;
+      border: 1.5px solid #2a2a2a; transition: border-color .15s;
+    }
+    .search-row:focus-within { border-color: #555; }
+    body.day-mode .search-row { background: #f5f5f5; border-color: #e0e0e0; }
+    body.day-mode .search-row:focus-within { border-color: #aaa; }
+
+    .search-icon { font-size: 16px; flex-shrink: 0; opacity: .5; }
+    .search-input {
+      flex: 1; background: none; border: none; outline: none;
+      font-size: 15px; color: #fff; font-family: inherit;
+    }
+    .search-input::placeholder { color: #444; }
+    body.day-mode .search-input { color: #111; }
+    body.day-mode .search-input::placeholder { color: #bbb; }
+
+    .search-clear {
+      background: none; border: none; color: #555; font-size: 16px;
+      cursor: pointer; padding: 4px; line-height: 1; display: none;
+    }
+    .search-clear.visible { display: block; }
+    body.day-mode .search-clear { color: #bbb; }
+
+    /* Suggestions */
+    .suggestions {
+      position: absolute; bottom: calc(100% + 6px); left: 0; right: 0;
+      background: #1a1a1a; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 -4px 20px rgba(0,0,0,.4);
+      border: 1px solid #2a2a2a;
+    }
+    body.day-mode .suggestions { background: #fff; border-color: #e0e0e0; box-shadow: 0 -4px 20px rgba(0,0,0,.1); }
+
+    .sug-item {
+      padding: 12px 16px; cursor: pointer; display: flex; align-items: flex-start; gap: 10px;
+      border-bottom: 1px solid #222; transition: background .1s;
+    }
+    .sug-item:last-child { border-bottom: none; }
+    .sug-item:active { background: #222; }
+    body.day-mode .sug-item { border-bottom-color: #f0f0f0; }
+    body.day-mode .sug-item:active { background: #f5f5f5; }
+
+    .sug-pin { font-size: 16px; margin-top: 1px; flex-shrink: 0; opacity: .6; }
+    .sug-text { flex: 1; min-width: 0; }
+    .sug-name { font-size: 14px; color: #e0e0e0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sug-sub  { font-size: 12px; color: #555; margin-top: 1px; }
+    body.day-mode .sug-name { color: #111; }
+    body.day-mode .sug-sub  { color: #bbb; }
+    .sug-loading { padding: 14px 16px; font-size: 13px; color: #555; text-align: center; }
+
+    /* ── Idle card ────────────────────────────────────────────────── */
     #locate-btn {
-      width: 100%; height: 58px; border-radius: 14px;
+      width: 100%; height: 50px; border-radius: 12px;
       background: #fff; color: #000; border: none;
-      font-size: 16px; font-weight: 800; cursor: pointer;
+      font-size: 15px; font-weight: 800; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 8px;
-      margin-bottom: 14px; letter-spacing: -.01em;
+      margin-bottom: 12px;
     }
     #locate-btn:active { background: #e0e0e0; }
     body.day-mode #locate-btn { background: #111; color: #fff; }
     body.day-mode #locate-btn:active { background: #333; }
 
-    #tap-hint { text-align: center; font-size: 13px; color: #444; }
-    body.day-mode #tap-hint { color: #bbb; }
+    .card-hint { text-align: center; font-size: 13px; color: #444; }
+    body.day-mode .card-hint { color: #bbb; }
+
+    /* ── Pick-end card ────────────────────────────────────────────── */
+    #pickend-topbar {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    }
+    #back-btn {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      background: #1a1a1a; border: none; color: #888; font-size: 18px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    #back-btn:active { background: #2a2a2a; }
+    body.day-mode #back-btn { background: #f0f0f0; color: #888; }
+    #pickend-label { font-size: 13px; color: #666; font-weight: 600; }
+    body.day-mode #pickend-label { color: #bbb; }
 
     /* ── Preview sheet ────────────────────────────────────────────── */
     #preview-sheet {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
+      background: #111; border-radius: 22px 22px 0 0;
+      box-shadow: 0 -4px 32px rgba(0,0,0,.6);
       padding: 0 20px max(env(safe-area-inset-bottom, 0px), 20px);
       max-height: 82vh; display: flex; flex-direction: column;
-      transform: translateY(110%);
-      transition: transform .32s cubic-bezier(.4, 0, .2, 1);
+      transform: translateY(110%); transition: transform .32s cubic-bezier(.4,0,.2,1);
     }
     #preview-sheet.open { transform: none; }
+    body.day-mode #preview-sheet { background: #fff; box-shadow: 0 -4px 32px rgba(0,0,0,.12); }
 
     #sheet-handle {
       width: 38px; height: 4px; background: #2a2a2a; border-radius: 2px;
@@ -153,10 +190,7 @@
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 14px; flex-shrink: 0;
     }
-    #sheet-eyebrow {
-      font-size: 11px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .1em; color: #444;
-    }
+    #sheet-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #444; }
     body.day-mode #sheet-eyebrow { color: #bbb; }
 
     #new-route-btn {
@@ -165,9 +199,7 @@
     }
     #new-route-btn:active { background: #1a1a1a; }
     body.day-mode #new-route-btn { border-color: #e0e0e0; color: #aaa; }
-    body.day-mode #new-route-btn:active { background: #f5f5f5; }
 
-    /* Profile cards */
     #profile-cards { display: flex; gap: 10px; margin-bottom: 18px; flex-shrink: 0; }
     .p-card {
       flex: 1; border-radius: 14px; padding: 14px;
@@ -177,27 +209,20 @@
     .p-card.active { border-color: #fff; background: #1e1e1e; }
     body.day-mode .p-card { background: #f5f5f5; border-color: #e8e8e8; }
     body.day-mode .p-card.active { border-color: #111; background: #eaeaea; }
-
     .p-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
     .p-card-label { font-size: 12px; font-weight: 700; color: #888; }
     body.day-mode .p-card-label { color: #aaa; }
     .p-card-speed { font-size: 11px; color: #444; font-weight: 600; }
     body.day-mode .p-card-speed { color: #ccc; }
-
-    .p-card-time {
-      font-size: 28px; font-weight: 900; line-height: 1; color: #fff;
-      margin-bottom: 3px; font-variant-numeric: tabular-nums;
-    }
+    .p-card-time { font-size: 28px; font-weight: 900; line-height: 1; color: #fff; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
     body.day-mode .p-card-time { color: #111; }
     .p-card-time.dim { color: #333; font-size: 18px; padding-top: 5px; }
     body.day-mode .p-card-time.dim { color: #ccc; }
     .p-card-dist { font-size: 12px; color: #444; }
     body.day-mode .p-card-dist { color: #bbb; }
-
     .p-card[data-p="snorfiets"].active .p-card-label { color: #3b82f6; }
     .p-card[data-p="bromfiets"].active .p-card-label { color: #f59e0b; }
 
-    /* Start button */
     #start-btn {
       width: 100%; height: 58px; border-radius: 14px;
       background: #fff; color: #000; border: none;
@@ -207,27 +232,18 @@
     }
     #start-btn:active { background: #ddd; }
     body.day-mode #start-btn { background: #111; color: #fff; }
-    body.day-mode #start-btn:active { background: #333; }
-
     #start-arrow {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: #000; color: #fff;
+      width: 28px; height: 28px; border-radius: 50%; background: #000; color: #fff;
       display: flex; align-items: center; justify-content: center; font-size: 12px;
     }
     body.day-mode #start-arrow { background: #fff; color: #000; }
 
-    /* Steps */
     .divider { height: 1px; background: #1a1a1a; margin-bottom: 14px; flex-shrink: 0; }
     body.day-mode .divider { background: #eee; }
-
     #steps-scroll { overflow-y: auto; flex: 1; padding-bottom: 4px; }
-    .step-row {
-      display: flex; align-items: flex-start; gap: 14px;
-      padding: 11px 0; border-bottom: 1px solid #1a1a1a;
-    }
+    .step-row { display: flex; align-items: flex-start; gap: 14px; padding: 11px 0; border-bottom: 1px solid #1a1a1a; }
     .step-row:last-child { border-bottom: none; }
     body.day-mode .step-row { border-bottom-color: #f0f0f0; }
-
     .step-icon {
       width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
       background: #1a1a1a; display: flex; align-items: center; justify-content: center;
@@ -237,17 +253,15 @@
     .step-body { flex: 1; padding-top: 2px; }
     .step-instr { font-size: 14px; color: #ddd; line-height: 1.4; }
     body.day-mode .step-instr { color: #222; }
-    .step-dist  { font-size: 12px; color: #444; margin-top: 2px; }
+    .step-dist { font-size: 12px; color: #444; margin-top: 2px; }
     body.day-mode .step-dist { color: #bbb; }
-
     #show-all-btn {
       background: none; border: none; color: #555; font-size: 13px; font-weight: 700;
       cursor: pointer; padding: 12px 0 2px; width: 100%; text-align: left;
     }
-    #show-all-btn:hover { color: #999; }
     body.day-mode #show-all-btn { color: #bbb; }
 
-    /* ── Navigation bottom bar ─────────────────────────────────────── */
+    /* ── Nav bar ──────────────────────────────────────────────────── */
     #nav-bar {
       position: absolute; bottom: 0; left: 0; right: 0; z-index: 20;
       background: #111; border-top: 1px solid #1a1a1a;
@@ -255,29 +269,19 @@
       display: flex; align-items: center; justify-content: space-between;
     }
     body.day-mode #nav-bar { background: #fff; border-top-color: #eee; }
-
     #nav-stats { display: flex; gap: 24px; align-items: flex-end; }
-    .nav-stat-val {
-      font-size: 32px; font-weight: 900; color: #fff; line-height: 1;
-      font-variant-numeric: tabular-nums;
-    }
+    .nav-stat-val { font-size: 32px; font-weight: 900; color: #fff; line-height: 1; font-variant-numeric: tabular-nums; }
     body.day-mode .nav-stat-val { color: #111; }
-    .nav-stat-unit {
-      font-size: 11px; color: #444; text-transform: uppercase;
-      letter-spacing: .07em; margin-top: 4px;
-    }
+    .nav-stat-unit { font-size: 11px; color: #444; text-transform: uppercase; letter-spacing: .07em; margin-top: 4px; }
     body.day-mode .nav-stat-unit { color: #bbb; }
-
     #end-btn {
       background: #1a1a1a; border: 1.5px solid #2a2a2a; border-radius: 14px;
-      color: #fff; font-size: 15px; font-weight: 800;
-      padding: 14px 24px; cursor: pointer; letter-spacing: -.01em;
+      color: #fff; font-size: 15px; font-weight: 800; padding: 14px 24px; cursor: pointer;
     }
     #end-btn:active { background: #2a2a2a; }
     body.day-mode #end-btn { background: #f0f0f0; border-color: #ddd; color: #111; }
-    body.day-mode #end-btn:active { background: #e0e0e0; }
 
-    /* ── Loading ───────────────────────────────────────────────────── */
+    /* ── Loading ──────────────────────────────────────────────────── */
     #loading {
       display: none; position: absolute; inset: 0; z-index: 30;
       background: rgba(0,0,0,.65); backdrop-filter: blur(6px);
@@ -292,7 +296,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     #loading p { font-size: 14px; font-weight: 600; color: #666; }
 
-    /* ── Toast ─────────────────────────────────────────────────────── */
+    /* ── Toast ────────────────────────────────────────────────────── */
     #toast {
       position: absolute; bottom: 140px; left: 50%;
       transform: translateX(-50%) translateY(16px);
@@ -303,13 +307,11 @@
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* ── Markers ───────────────────────────────────────────────────── */
+    /* ── Markers ──────────────────────────────────────────────────── */
     .pin {
-      width: 36px; height: 36px;
-      border-radius: 50% 50% 50% 2px; transform: rotate(-45deg);
+      width: 36px; height: 36px; border-radius: 50% 50% 50% 2px; transform: rotate(-45deg);
       display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 900;
-      box-shadow: 0 4px 12px rgba(0,0,0,.6);
+      font-size: 13px; font-weight: 900; box-shadow: 0 4px 12px rgba(0,0,0,.6);
     }
     .pin span { transform: rotate(45deg); }
     .pin-start { background: #fff; color: #000; }
@@ -320,11 +322,9 @@
 </head>
 <body>
   <div id="map"></div>
-
-  <!-- Day / night toggle (always top-right) -->
   <button id="mode-btn" title="Toggle day/night">🌙</button>
 
-  <!-- Top: navigation maneuver card -->
+  <!-- Navigation maneuver card -->
   <div id="nav-card" class="hidden">
     <div id="nav-inner">
       <div id="nav-icon-wrap"><div id="nav-arrow">↑</div></div>
@@ -336,22 +336,44 @@
     <div id="nav-advance"></div>
   </div>
 
-  <!-- Top: pick-end hint -->
-  <div id="hint-bar" class="hidden">
-    <div id="hint-pill">Tap the map to drop your destination</div>
-  </div>
-
-  <!-- Bottom: idle -->
+  <!-- Idle bottom card: search + locate -->
   <div id="idle-card" class="bottom-card">
-    <div id="idle-eyebrow">ScootRoute &middot; Amsterdam</div>
+    <div class="card-eyebrow">ScootRoute &middot; Amsterdam</div>
+    <div class="search-wrap">
+      <div class="search-row">
+        <span class="search-icon">&#x1F50D;</span>
+        <input class="search-input" id="q-start" type="search" autocomplete="off"
+               placeholder="Search start address&hellip;">
+        <button class="search-clear" id="clr-start">&#x2715;</button>
+      </div>
+      <div class="suggestions hidden" id="sug-start"></div>
+    </div>
     <button id="locate-btn">
-      <span style="font-size:20px">&#x1F4CD;</span> Use my location
+      <span style="font-size:18px">&#x1F4CD;</span> Use my location
     </button>
-    <div id="tap-hint">or tap anywhere on the map</div>
+    <p class="card-hint">or tap anywhere on the map</p>
   </div>
 
-  <!-- Bottom: route preview -->
-  <div id="preview-sheet" class="bottom-card">
+  <!-- Pick-end bottom card: search for destination -->
+  <div id="pickend-card" class="bottom-card hidden">
+    <div id="pickend-topbar">
+      <button id="back-btn">&#x2190;</button>
+      <span id="pickend-label">Start set &mdash; search your destination</span>
+    </div>
+    <div class="search-wrap">
+      <div class="search-row">
+        <span class="search-icon">&#x1F50D;</span>
+        <input class="search-input" id="q-end" type="search" autocomplete="off"
+               placeholder="Search destination&hellip;">
+        <button class="search-clear" id="clr-end">&#x2715;</button>
+      </div>
+      <div class="suggestions hidden" id="sug-end"></div>
+    </div>
+    <p class="card-hint">or tap anywhere on the map</p>
+  </div>
+
+  <!-- Route preview sheet -->
+  <div id="preview-sheet">
     <div id="sheet-handle"></div>
     <div id="sheet-top-row">
       <div id="sheet-eyebrow">Choose your ride</div>
@@ -376,8 +398,7 @@
       </div>
     </div>
     <button id="start-btn">
-      <div id="start-arrow">&#x25B6;</div>
-      Start Navigation
+      <div id="start-arrow">&#x25B6;</div> Start Navigation
     </button>
     <div class="divider"></div>
     <div id="steps-scroll">
@@ -386,17 +407,11 @@
     </div>
   </div>
 
-  <!-- Bottom: navigation bar -->
+  <!-- Navigation bottom bar -->
   <div id="nav-bar" class="hidden">
     <div id="nav-stats">
-      <div>
-        <div class="nav-stat-val" id="nav-mins">—</div>
-        <div class="nav-stat-unit">min left</div>
-      </div>
-      <div>
-        <div class="nav-stat-val" id="nav-km">—</div>
-        <div class="nav-stat-unit">km left</div>
-      </div>
+      <div><div class="nav-stat-val" id="nav-mins">—</div><div class="nav-stat-unit">min left</div></div>
+      <div><div class="nav-stat-val" id="nav-km">—</div><div class="nav-stat-unit">km left</div></div>
     </div>
     <button id="end-btn">End</button>
   </div>
@@ -405,37 +420,20 @@
   <div id="toast"></div>
 
 <script>
-// ── Polyline6 decoder ───────────────────────────────────────────────────────
-function decodePolyline6(enc) {
-  const out = []; let i = 0, lat = 0, lon = 0;
-  while (i < enc.length) {
-    let b, s = 0, r = 0;
-    do { b = enc.charCodeAt(i++) - 63; r |= (b & 0x1f) << s; s += 5; } while (b >= 0x20);
-    lat += r & 1 ? ~(r >> 1) : r >> 1;
-    s = 0; r = 0;
-    do { b = enc.charCodeAt(i++) - 63; r |= (b & 0x1f) << s; s += 5; } while (b >= 0x20);
-    lon += r & 1 ? ~(r >> 1) : r >> 1;
-    out.push([lon / 1e6, lat / 1e6]);
-  }
-  return out;
-}
+// ── Config ───────────────────────────────────────────────────────────────────
+// When running as a native Capacitor app, HTML is served from capacitor://localhost
+// so all API calls need an absolute URL pointing to the Mac's server.
+const IS_NATIVE = !!(window.Capacitor?.isNativePlatform?.());
+const API_BASE  = IS_NATIVE ? 'http://192.168.2.11:3000' : '';
 
-const ICONS = {
-  0:'•',  1:'▶',  2:'▶',  3:'▶',  4:'🏁', 5:'🏁', 6:'🏁',
-  7:'↑',  8:'↑',  9:'↗', 10:'→', 11:'⤴', 12:'↩', 13:'↪',
-  14:'⤵',15:'←', 16:'↖', 17:'↑', 18:'↗', 19:'↖',
-  20:'↗',21:'↖', 22:'↑', 23:'↗', 24:'↖', 25:'↑',
-  26:'↻',27:'↗', 28:'⛴', 29:'⛴',
-};
-
-const COLOR = { snorfiets: '#3b82f6', bromfiets: '#f59e0b' };
-const PREVIEW_STEPS = 3;
 const STYLES = {
   night: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
   day:   'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
 };
+const COLOR       = { snorfiets: '#3b82f6', bromfiets: '#f59e0b' };
+const PREVIEW_STEPS = 3;
 
-// ── State ────────────────────────────────────────────────────────────────────
+// ── State ─────────────────────────────────────────────────────────────────────
 let profile  = 'snorfiets';
 let phase    = 'idle';
 let mapMode  = 'night';
@@ -444,108 +442,239 @@ let markerA  = null, markerB = null;
 let routes   = { snorfiets: null, bromfiets: null };
 let navStep  = 0;
 let stepsExpanded = false;
+let map;
 
-// ── Map ──────────────────────────────────────────────────────────────────────
-const map = new maplibregl.Map({
-  container: 'map',
-  style: STYLES.night,
-  center: [4.9041, 52.3676],
-  zoom: 13,
-});
-
-const geolocate = new maplibregl.GeolocateControl({
-  positionOptions: { enableHighAccuracy: true },
-  trackUserLocation: true,
-  showUserHeading: true,
-});
-map.addControl(geolocate, 'bottom-right');
-
-// Called after every style load (initial + after setStyle)
-map.on('style.load', () => {
-  addRouteLayers();
-  if (mapMode === 'night') applyNightStyle();
-  if (routes[profile]) paintRoute(routes[profile]);
-});
-
-map.on('click', e => {
-  if (phase === 'routing' || phase === 'preview' || phase === 'navigating') return;
-  const { lng, lat } = e.lngLat;
-  if      (phase === 'idle')     setStart({ lng, lat });
-  else if (phase === 'pick-end') setEnd({ lng, lat });
-});
-
-// ── Route layer setup ────────────────────────────────────────────────────────
-function addRouteLayers() {
-  if (map.getSource('route')) return;
-  map.addSource('route', { type: 'geojson', data: emptyLine() });
-  map.addLayer({
-    id: 'route-casing', type: 'line', source: 'route',
-    layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': mapMode === 'night' ? '#000' : '#fff', 'line-width': 10 },
-  });
-  map.addLayer({
-    id: 'route-fill', type: 'line', source: 'route',
-    layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': COLOR[profile], 'line-width': 5.5 },
-  });
-}
-
-// ── Night-mode style treatment ───────────────────────────────────────────────
-// Remaps the CARTO dark-matter palette: near-black land, white major roads.
-function applyNightStyle() {
-  const layers = map.getStyle()?.layers ?? [];
-  layers.forEach(({ id, type }) => {
+// ── Night style treatment ─────────────────────────────────────────────────────
+// Applied directly to the fetched style JSON before MapLibre sees it —
+// eliminates any flash of wrong colours during tile loading or zoom changes.
+function nightifyStyle(style) {
+  style.layers.forEach(layer => {
+    const { id, type } = layer;
     try {
+      if (!layer.paint) layer.paint = {};
       if (type === 'background') {
-        map.setPaintProperty(id, 'background-color', '#030303');
-
+        layer.paint['background-color'] = '#030303';
       } else if (type === 'fill') {
-        if (/water|ocean|sea|lake|river|bay/.test(id)) {
-          map.setPaintProperty(id, 'fill-color', '#060c18');
-        } else if (/park|wood|grass|forest|green|garden|vegetation/.test(id)) {
-          map.setPaintProperty(id, 'fill-color', '#060a06');
-        } else {
-          map.setPaintProperty(id, 'fill-color', '#040404');
-        }
-        try { map.setPaintProperty(id, 'fill-outline-color', 'rgba(0,0,0,0)'); } catch (_) {}
-
+        if (/water|ocean|sea|lake|river|bay/.test(id))
+          layer.paint['fill-color'] = '#060c18';
+        else if (/park|wood|grass|forest|green|garden|vegetation/.test(id))
+          layer.paint['fill-color'] = '#060a06';
+        else
+          layer.paint['fill-color'] = '#040404';
+        layer.paint['fill-outline-color'] = 'rgba(0,0,0,0)';
       } else if (type === 'line') {
         const isCasing  = /casing/.test(id);
         const isMajor   = /motorway|trunk/.test(id);
         const isPrimary = /primary/.test(id);
         const isSec     = /secondary|tertiary/.test(id);
         const isStreet  = /street|residential|service|minor|path|pedestrian|track/.test(id);
-        const isRail    = /rail|tram|transit/.test(id);
         const isWater   = /water|river|canal/.test(id);
-
-        if (isWater)        map.setPaintProperty(id, 'line-color', '#060c18');
-        else if (isCasing)  map.setPaintProperty(id, 'line-color', '#080808');
-        else if (isMajor)   map.setPaintProperty(id, 'line-color', '#ffffff');
-        else if (isPrimary) map.setPaintProperty(id, 'line-color', '#d4d4d4');
-        else if (isSec)     map.setPaintProperty(id, 'line-color', '#888888');
-        else if (isStreet)  map.setPaintProperty(id, 'line-color', '#444444');
-        else if (isRail)    map.setPaintProperty(id, 'line-color', '#1c1c1c');
-
+        const isRail    = /rail|tram|transit/.test(id);
+        if (isWater)        layer.paint['line-color'] = '#060c18';
+        else if (isCasing)  layer.paint['line-color'] = '#080808';
+        else if (isMajor)   layer.paint['line-color'] = '#ffffff';
+        else if (isPrimary) layer.paint['line-color'] = '#d4d4d4';
+        else if (isSec)     layer.paint['line-color'] = '#888888';
+        else if (isStreet)  layer.paint['line-color'] = '#444444';
+        else if (isRail)    layer.paint['line-color'] = '#1c1c1c';
       } else if (type === 'symbol') {
-        try { map.setPaintProperty(id, 'text-color', '#666666'); } catch (_) {}
-        try { map.setPaintProperty(id, 'text-halo-color', '#000000'); } catch (_) {}
-        try { map.setPaintProperty(id, 'text-halo-width', 1.5); } catch (_) {}
-        try { map.setPaintProperty(id, 'icon-opacity', 0.5); } catch (_) {}
+        if (layer.paint['text-color']   !== undefined) layer.paint['text-color']   = '#666666';
+        if (layer.paint['text-halo-color'] !== undefined) layer.paint['text-halo-color'] = '#000000';
+        layer.paint['text-halo-width'] = 1.5;
       }
-    } catch (_) { /* layer may not support the property */ }
+    } catch (_) {}
   });
 }
 
-// ── Day / Night toggle ───────────────────────────────────────────────────────
-$('mode-btn').addEventListener('click', () => {
+async function fetchStyle(mode) {
+  const res   = await fetch(STYLES[mode]);
+  const style = await res.json();
+  if (mode === 'night') nightifyStyle(style);
+  return style;
+}
+
+// ── Polyline6 decoder ─────────────────────────────────────────────────────────
+function decodePolyline6(enc) {
+  const out = []; let i = 0, lat = 0, lon = 0;
+  while (i < enc.length) {
+    let b, s = 0, r = 0;
+    do { b = enc.charCodeAt(i++) - 63; r |= (b & 0x1f) << s; s += 5; } while (b >= 0x20);
+    lat += r & 1 ? ~(r >> 1) : r >> 1; s = 0; r = 0;
+    do { b = enc.charCodeAt(i++) - 63; r |= (b & 0x1f) << s; s += 5; } while (b >= 0x20);
+    lon += r & 1 ? ~(r >> 1) : r >> 1;
+    out.push([lon / 1e6, lat / 1e6]);
+  }
+  return out;
+}
+
+const ICONS = {
+  0:'•',1:'▶',2:'▶',3:'▶',4:'🏁',5:'🏁',6:'🏁',
+  7:'↑',8:'↑',9:'↗',10:'→',11:'⤴',12:'↩',13:'↪',
+  14:'⤵',15:'←',16:'↖',17:'↑',18:'↗',19:'↖',
+  20:'↗',21:'↖',22:'↑',23:'↗',24:'↖',25:'↑',
+  26:'↻',27:'↗',28:'⛴',29:'⛴',
+};
+
+// ── Geocoding search (Photon by Komoot — free, no key) ────────────────────────
+// Biased to Amsterdam's bounding box.
+const AMSTERDAM_BBOX = '4.72,52.28,5.08,52.43';
+let searchTimer;
+
+function bindSearch(inputId, clearId, sugId, onSelect) {
+  const input = $(inputId), clrBtn = $(clearId), sug = $(sugId);
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim();
+    clrBtn.classList.toggle('visible', q.length > 0);
+    clearTimeout(searchTimer);
+    if (q.length < 2) { hideSug(sug); return; }
+    searchTimer = setTimeout(() => runSearch(q, sug, onSelect), 320);
+  });
+
+  clrBtn.addEventListener('click', () => {
+    input.value = ''; clrBtn.classList.remove('visible'); hideSug(sug); input.focus();
+  });
+
+  // Close suggestions on map tap
+  map.on('click', () => hideSug(sug));
+}
+
+async function runSearch(query, sugEl, onSelect) {
+  sugEl.innerHTML = '<div class="sug-loading">Searching…</div>';
+  sugEl.classList.remove('hidden');
+  try {
+    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&bbox=${AMSTERDAM_BBOX}&limit=5&lang=nl`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    renderSuggestions(data.features, sugEl, onSelect);
+  } catch (_) {
+    sugEl.innerHTML = '<div class="sug-loading">Search unavailable</div>';
+  }
+}
+
+function renderSuggestions(features, sugEl, onSelect) {
+  if (!features.length) {
+    sugEl.innerHTML = '<div class="sug-loading">No results</div>'; return;
+  }
+  sugEl.innerHTML = features.map((f, i) => {
+    const p   = f.properties;
+    const name = p.name || p.street || 'Location';
+    const parts = [p.street && p.street !== name ? p.street : null,
+                   p.housenumber, p.city].filter(Boolean);
+    const sub  = parts.join(' ') || '';
+    return `<div class="sug-item" data-i="${i}">
+      <div class="sug-pin">&#x1F4CC;</div>
+      <div class="sug-text">
+        <div class="sug-name">${escHtml(name)}</div>
+        ${sub ? `<div class="sug-sub">${escHtml(sub)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+  sugEl.querySelectorAll('.sug-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const f  = features[+el.dataset.i];
+      const ll = { lng: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] };
+      hideSug(sugEl);
+      onSelect(ll);
+    });
+  });
+}
+
+function hideSug(el) { el.classList.add('hidden'); el.innerHTML = ''; }
+function escHtml(s)  { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── Map initialisation (async — pre-fetches style) ────────────────────────────
+async function initApp() {
+  const style = await fetchStyle(mapMode);
+
+  map = new maplibregl.Map({
+    container: 'map', style,
+    center: [4.9041, 52.3676], zoom: 13,
+  });
+
+  const geolocate = new maplibregl.GeolocateControl({
+    positionOptions: { enableHighAccuracy: true },
+    trackUserLocation: true, showUserHeading: true,
+  });
+  map.addControl(geolocate, 'bottom-right');
+
+  map.on('style.load', () => {
+    addRouteLayers();
+    if (routes[profile]) paintRoute(routes[profile]);
+  });
+
+  map.on('click', e => {
+    if (phase === 'routing' || phase === 'preview' || phase === 'navigating') return;
+    const { lng, lat } = e.lngLat;
+    if      (phase === 'idle')     setStart({ lng, lat });
+    else if (phase === 'pick-end') setEnd({ lng, lat });
+  });
+
+  // Wire up search boxes after map exists
+  bindSearch('q-start', 'clr-start', 'sug-start', ll => { setStart(ll); map.flyTo({ center: [ll.lng, ll.lat], zoom: 15 }); });
+  bindSearch('q-end',   'clr-end',   'sug-end',   ll => { setEnd(ll);   map.flyTo({ center: [ll.lng, ll.lat], zoom: 15 }); });
+
+  // Rest of event wiring
+  $('mode-btn').addEventListener('click', toggleMode);
+  $('locate-btn').addEventListener('click', locateMe);
+  $('back-btn').addEventListener('click', () => { resetAll(); });
+  $('start-btn').addEventListener('click', startNav);
+  $('end-btn').addEventListener('click', endNav);
+  $('new-route-btn').addEventListener('click', resetAll);
+  $('nav-card').addEventListener('click', advanceStep);
+  $('show-all-btn').addEventListener('click', () => {
+    stepsExpanded = !stepsExpanded;
+    if (routes[profile]) renderSteps(routes[profile].maneuvers);
+  });
+  document.querySelectorAll('.p-card').forEach(card => {
+    card.addEventListener('click', () => {
+      profile = card.dataset.p;
+      document.querySelectorAll('.p-card').forEach(c => c.classList.toggle('active', c === card));
+      if (routes[profile]) { paintRoute(routes[profile]); renderSteps(routes[profile].maneuvers); }
+    });
+  });
+}
+
+// ── Route layers ──────────────────────────────────────────────────────────────
+function addRouteLayers() {
+  if (map.getSource('route')) return;
+  map.addSource('route', { type: 'geojson', data: emptyLine() });
+  map.addLayer({ id: 'route-casing', type: 'line', source: 'route',
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': mapMode === 'night' ? '#000' : '#fff', 'line-width': 10 } });
+  map.addLayer({ id: 'route-fill', type: 'line', source: 'route',
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': COLOR[profile], 'line-width': 5.5 } });
+}
+
+// ── Mode toggle ────────────────────────────────────────────────────────────────
+async function toggleMode() {
   mapMode = mapMode === 'night' ? 'day' : 'night';
   $('mode-btn').textContent = mapMode === 'night' ? '🌙' : '☀️';
   document.body.classList.toggle('day-mode', mapMode === 'day');
-  map.setStyle(STYLES[mapMode]);
-  // Route layers and night treatment re-applied in the 'style.load' handler above
-});
+  const newStyle = await fetchStyle(mapMode);
+  map.setStyle(newStyle);
+}
 
-// ── Markers ──────────────────────────────────────────────────────────────────
+// ── Locate button ──────────────────────────────────────────────────────────────
+function locateMe() {
+  if (!navigator.geolocation) { toast('Geolocation not supported'); return; }
+  navigator.geolocation.getCurrentPosition(
+    ({ coords: { longitude: lng, latitude: lat } }) => {
+      map.flyTo({ center: [lng, lat], zoom: 15, duration: 800 });
+      setStart({ lng, lat });
+      // Trigger live dot
+      map.getContainer().querySelector('.maplibregl-ctrl-geolocate')?.click();
+    },
+    err => {
+      if (err.code === 1) toast('Location permission denied — enable it in Settings');
+      else toast('Could not get your location');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+// ── Markers ────────────────────────────────────────────────────────────────────
 function makePin(label, kind) {
   const el = document.createElement('div');
   el.innerHTML = `<div class="pin pin-${kind}"><span>${label}</span></div>`;
@@ -557,6 +686,8 @@ function setStart(ll) {
   markerA?.remove();
   markerA = makePin('A', 'start').setLngLat([ll.lng, ll.lat]).addTo(map);
   phase = 'pick-end';
+  // Clear start search input
+  $('q-start').value = ''; $('clr-start').classList.remove('visible');
   panel('pick-end');
 }
 
@@ -564,33 +695,28 @@ function setEnd(ll) {
   endLL = ll;
   markerB?.remove();
   markerB = makePin('B', 'end').setLngLat([ll.lng, ll.lat]).addTo(map);
+  // Clear end search input
+  $('q-end').value = ''; $('clr-end').classList.remove('visible');
   fetchBoth();
 }
 
-// ── Routing ──────────────────────────────────────────────────────────────────
+// ── Routing ────────────────────────────────────────────────────────────────────
 async function fetchBoth() {
-  phase = 'routing';
-  loading(true);
+  phase = 'routing'; loading(true);
   routes.snorfiets = null; routes.bromfiets = null;
   try {
-    const mk = (p) => fetch(`/route?profile=${p}&from=${startLL.lat},${startLL.lng}&to=${endLL.lat},${endLL.lng}`);
-    const [sRes, bRes] = await Promise.all([mk('snorfiets'), mk('bromfiets')]);
+    const mk = p => fetch(`${API_BASE}/route?profile=${p}&from=${startLL.lat},${startLL.lng}&to=${endLL.lat},${endLL.lng}`);
+    const [sRes, bRes]   = await Promise.all([mk('snorfiets'), mk('bromfiets')]);
     const [sData, bData] = await Promise.all([sRes.json(), bRes.json()]);
     if (!sRes.ok) throw new Error(sData.error || 'Routing failed');
     if (!bRes.ok) throw new Error(bData.error || 'Routing failed');
-    routes.snorfiets = sData;
-    routes.bromfiets = bData;
-    fillCard('snorf', sData);
-    fillCard('brom',  bData);
+    routes.snorfiets = sData; routes.bromfiets = bData;
+    fillCard('snorf', sData); fillCard('brom', bData);
     phase = 'preview';
     openPreview();
   } catch (err) {
-    toast(err.message);
-    phase = 'pick-end';
-    panel('pick-end');
-  } finally {
-    loading(false);
-  }
+    toast(err.message); phase = 'pick-end'; panel('pick-end');
+  } finally { loading(false); }
 }
 
 function fillCard(prefix, data) {
@@ -612,14 +738,11 @@ function openPreview() {
 
 function paintRoute(data) {
   if (!map.getSource('route')) return;
-  map.getSource('route').setData({
-    type: 'Feature', geometry: { type: 'LineString', coordinates: decodePolyline6(data.shape) },
-  });
-  map.setPaintProperty('route-fill', 'line-color', COLOR[profile]);
+  map.getSource('route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: decodePolyline6(data.shape) } });
+  map.setPaintProperty('route-fill',   'line-color', COLOR[profile]);
   map.setPaintProperty('route-casing', 'line-color', mapMode === 'night' ? '#000' : '#fff');
 }
 
-// ── Steps ────────────────────────────────────────────────────────────────────
 function renderSteps(maneuvers) {
   const count = stepsExpanded ? maneuvers.length : Math.min(PREVIEW_STEPS, maneuvers.length);
   $('steps-list').innerHTML = maneuvers.slice(0, count).map(m => {
@@ -629,46 +752,26 @@ function renderSteps(maneuvers) {
       <div class="step-body">
         <div class="step-instr">${m.instruction}</div>
         <div class="step-dist">${dist}</div>
-      </div>
-    </div>`;
+      </div></div>`;
   }).join('');
   const btn = $('show-all-btn');
   if (maneuvers.length > PREVIEW_STEPS) {
     btn.style.display = 'block';
     btn.textContent = stepsExpanded ? '↑ Fewer steps' : `↓ All ${maneuvers.length} steps`;
-  } else {
-    btn.style.display = 'none';
-  }
+  } else btn.style.display = 'none';
 }
 
-$('show-all-btn').addEventListener('click', () => {
-  stepsExpanded = !stepsExpanded;
-  if (routes[profile]) renderSteps(routes[profile].maneuvers);
-});
-
-// ── Profile cards ─────────────────────────────────────────────────────────────
-document.querySelectorAll('.p-card').forEach(card => {
-  card.addEventListener('click', () => {
-    profile = card.dataset.p;
-    document.querySelectorAll('.p-card').forEach(c => c.classList.toggle('active', c === card));
-    if (routes[profile]) { paintRoute(routes[profile]); renderSteps(routes[profile].maneuvers); }
-  });
-});
-
-// ── Start navigation ──────────────────────────────────────────────────────────
-$('start-btn').addEventListener('click', () => {
-  navStep = 0;
-  phase = 'navigating';
+// ── Navigation ─────────────────────────────────────────────────────────────────
+function startNav() {
+  navStep = 0; phase = 'navigating';
   $('preview-sheet').classList.remove('open');
   panel('navigating');
-  geolocate.trigger();
-  refreshNavCard();
-  refreshNavBar();
-});
+  map.getContainer().querySelector('.maplibregl-ctrl-geolocate')?.click();
+  refreshNavCard(); refreshNavBar();
+}
 
 function refreshNavCard() {
-  const ms = routes[profile].maneuvers;
-  const m  = ms[navStep];
+  const ms = routes[profile].maneuvers, m = ms[navStep];
   $('nav-arrow').textContent = ICONS[m.type] ?? '↑';
   $('nav-instr').textContent = m.instruction;
   const dist = m.length < 0.1 ? `${Math.round(m.length * 1000)} m` : `${m.length.toFixed(1)} km`;
@@ -683,25 +786,19 @@ function refreshNavBar() {
   $('nav-km').textContent   = rem.dist.toFixed(1);
 }
 
-$('nav-card').addEventListener('click', () => {
-  if (navStep < routes[profile].maneuvers.length - 1) {
-    navStep++;
-    refreshNavCard();
-    refreshNavBar();
-  }
-});
+function advanceStep() {
+  if (navStep < routes[profile].maneuvers.length - 1) { navStep++; refreshNavCard(); refreshNavBar(); }
+}
 
-// ── End / New route ───────────────────────────────────────────────────────────
-$('end-btn').addEventListener('click', () => {
-  phase = 'preview';
-  panel('preview');
+function endNav() {
+  phase = 'preview'; panel('preview');
   $('preview-sheet').classList.add('open');
   const coords = decodePolyline6(routes[profile].shape);
   const bounds = coords.reduce((b,c) => b.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
   map.fitBounds(bounds, { padding: { top: 80, bottom: 370, left: 48, right: 48 }, duration: 500 });
-});
+}
 
-$('new-route-btn').addEventListener('click', () => {
+function resetAll() {
   phase = 'idle';
   startLL = null; endLL = null;
   markerA?.remove(); markerA = null;
@@ -709,46 +806,39 @@ $('new-route-btn').addEventListener('click', () => {
   routes.snorfiets = null; routes.bromfiets = null;
   stepsExpanded = false;
   [$('snorf-time'), $('brom-time')].forEach(el => { el.textContent = '—'; el.classList.add('dim'); });
-  [$('snorf-dist'), $('brom-dist')].forEach(el => { el.textContent = '—'; });
+  [$('snorf-dist'), $('brom-dist')].forEach(el => el.textContent = '—');
+  ['q-start','q-end'].forEach(id => { $(id).value = ''; });
+  ['clr-start','clr-end'].forEach(id => $(id).classList.remove('visible'));
+  ['sug-start','sug-end'].forEach(id => { $(id).classList.add('hidden'); $(id).innerHTML = ''; });
   if (map.getSource('route')) map.getSource('route').setData(emptyLine());
   $('preview-sheet').classList.remove('open');
   panel('idle');
-});
-
-// ── Locate button ─────────────────────────────────────────────────────────────
-$('locate-btn').addEventListener('click', () => {
-  if (!navigator.geolocation) { toast('Geolocation not supported'); return; }
-  navigator.geolocation.getCurrentPosition(
-    ({ coords: { longitude: lng, latitude: lat } }) => {
-      map.flyTo({ center: [lng, lat], zoom: 15, duration: 800 });
-      setStart({ lng, lat });
-      geolocate.trigger();
-    },
-    () => toast('Could not get your location — check permissions')
-  );
-});
-
-// ── Panel switcher ────────────────────────────────────────────────────────────
-function panel(p) {
-  $('idle-card').classList.toggle('hidden', p !== 'idle');
-  $('hint-bar').classList.toggle('hidden',  p !== 'pick-end');
-  $('nav-card').classList.toggle('hidden',  p !== 'navigating');
-  $('nav-bar').classList.toggle('hidden',   p !== 'navigating');
 }
 
-// ── Utilities ─────────────────────────────────────────────────────────────────
+// ── Panel switcher ─────────────────────────────────────────────────────────────
+function panel(p) {
+  $('idle-card').classList.toggle('hidden',     p !== 'idle');
+  $('pickend-card').classList.toggle('hidden',  p !== 'pick-end');
+  $('nav-card').classList.toggle('hidden',      p !== 'navigating');
+  $('nav-bar').classList.toggle('hidden',       p !== 'navigating');
+}
+
+// ── Utilities ──────────────────────────────────────────────────────────────────
 function $(id)       { return document.getElementById(id); }
 function emptyLine() { return { type: 'Feature', geometry: { type: 'LineString', coordinates: [] } }; }
 function loading(on) { $('loading').classList.toggle('on', on); }
 
 let toastTimer;
 function toast(msg) {
-  const el = $('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
+  const el = $('toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
 }
+
+// ── Boot ───────────────────────────────────────────────────────────────────────
+initApp().catch(err => {
+  document.body.innerHTML = `<div style="color:#fff;padding:40px;font-family:sans-serif">
+    <b>Failed to load map</b><br>${err.message}</div>`;
+});
 </script>
 </body>
 </html>

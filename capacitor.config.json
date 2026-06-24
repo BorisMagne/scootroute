@@ -2,10 +2,6 @@
   "appId": "com.scootroute.amsterdam",
   "appName": "ScootRoute",
   "webDir": "api/public",
-  "server": {
-    "url": "http://192.168.2.11:3000",
-    "cleartext": true
-  },
   "ios": {
     "contentInset": "always"
   }
