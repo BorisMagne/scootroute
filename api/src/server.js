@@ -9,6 +9,16 @@ const GOOGLE_KEY   = process.env.GOOGLE_MAPS_KEY || '';
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+
+// Capacitor serves the web bundle from capacitor://localhost, making every
+// call to the local Express API a cross-origin request. Allow it.
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') { res.sendStatus(200); return; }
+  next();
+});
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
