@@ -662,7 +662,11 @@ async function runSearch(q) {
   $('sug-list').innerHTML = '<div class="sug-spinner">Searching…</div>';
   try {
     const res  = await fetch(`${API_BASE}/geocode/suggest?q=${encodeURIComponent(q)}`);
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch(_) {
+      throw new Error(res.ok ? 'Bad server response' : `Server error ${res.status} — restart the API server`);
+    }
     if (!res.ok) throw new Error(data.error || 'Search failed');
     renderSugs(data);
   } catch(err) {
