@@ -20,50 +20,63 @@ function parseLatLon(s, label) {
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
-// Google Places Autocomplete — returns suggestions as user types.
+// Places API (New) — Autocomplete
 // GET /geocode/suggest?q=QUERY
 app.get('/geocode/suggest', async (req, res) => {
   if (!GOOGLE_KEY) return res.status(503).json({ error: 'GOOGLE_MAPS_KEY not configured' });
   const q = String(req.query.q || '').trim();
   if (!q) return res.json([]);
   try {
-    const url = new URL('https://maps.googleapis.com/maps/api/place/autocomplete/json');
-    url.searchParams.set('input', q);
-    url.searchParams.set('location', '52.3676,4.9041');
-    url.searchParams.set('radius', '25000');
-    url.searchParams.set('components', 'country:nl');
-    url.searchParams.set('language', 'nl');
-    url.searchParams.set('key', GOOGLE_KEY);
-    const data = await fetch(url).then(r => r.json());
-    res.json((data.predictions || []).map(p => ({
-      placeId:   p.place_id,
-      main:      p.structured_formatting?.main_text      || p.description,
-      secondary: p.structured_formatting?.secondary_text || '',
-    })));
+    const r = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_KEY,
+      },
+      body: JSON.stringify({
+        input: q,
+        locationBias: {
+          circle: { center: { latitude: 52.3676, longitude: 4.9041 }, radius: 25000.0 },
+        },
+        includedRegionCodes: ['nl'],
+        languageCode: 'nl',
+      }),
+    });
+    const data = await r.json();
+    if (!r.ok) return res.status(502).json({ error: data.error?.message || 'Google API error' });
+    res.json((data.suggestions || []).map(s => {
+      const p = s.placePrediction;
+      return {
+        placeId:   p.placeId,
+        main:      p.structuredFormat?.mainText?.text      || p.text?.text || '',
+        secondary: p.structuredFormat?.secondaryText?.text || '',
+      };
+    }));
   } catch (err) {
     res.status(502).json({ error: String(err.message) });
   }
 });
 
-// Google Place Details — resolves a place_id to coordinates.
+// Places API (New) — Place Details (resolves placeId to coordinates)
 // GET /geocode/details?id=PLACE_ID
 app.get('/geocode/details', async (req, res) => {
   if (!GOOGLE_KEY) return res.status(503).json({ error: 'GOOGLE_MAPS_KEY not configured' });
   const id = String(req.query.id || '').trim();
   if (!id) return res.status(400).json({ error: 'id required' });
   try {
-    const url = new URL('https://maps.googleapis.com/maps/api/place/details/json');
-    url.searchParams.set('place_id', id);
-    url.searchParams.set('fields', 'geometry,name,formatted_address');
-    url.searchParams.set('key', GOOGLE_KEY);
-    const data = await fetch(url).then(r => r.json());
-    const r = data.result;
-    if (!r) return res.status(404).json({ error: 'Place not found' });
+    const r = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(id)}`, {
+      headers: {
+        'X-Goog-Api-Key': GOOGLE_KEY,
+        'X-Goog-FieldMask': 'id,displayName,location,formattedAddress',
+      },
+    });
+    const data = await r.json();
+    if (!r.ok) return res.status(502).json({ error: data.error?.message || 'Google API error' });
     res.json({
-      lat:     r.geometry.location.lat,
-      lng:     r.geometry.location.lng,
-      name:    r.name,
-      address: r.formatted_address,
+      lat:     data.location.latitude,
+      lng:     data.location.longitude,
+      name:    data.displayName?.text || data.formattedAddress,
+      address: data.formattedAddress,
     });
   } catch (err) {
     res.status(502).json({ error: String(err.message) });
