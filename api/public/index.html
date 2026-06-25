@@ -700,7 +700,7 @@ function renderSugs(predictions) {
         if (!res.ok) throw new Error(data.error || 'Could not load location');
         closeSugOverlay();
         map.flyTo({ center: [data.lng, data.lat], zoom: 15, duration: 600 });
-        setEnd({ lat: data.lat, lng: data.lng }, { name: data.name, addr: data.address });
+        setEnd({ lat: data.lat, lng: data.lng });
       } catch(err) {
         $('sug-list').innerHTML = `<div class="sug-spinner">${esc(err.message)}</div>`;
       }
@@ -830,7 +830,7 @@ function placeMarker(label, lat, lng) {
   return m;
 }
 
-function setEnd(ll, meta) {
+function setEnd(ll) {
   endLL = ll;
   markerB?.remove();
   markerB = placeMarker('B', ll.lat, ll.lng);
@@ -841,11 +841,11 @@ function setEnd(ll, meta) {
   }
   // If no A marker yet, place it at startLL
   if (!markerA) markerA = placeMarker('A', startLL.lat, startLL.lng);
-  fetchRoute(meta);
+  fetchRoute();
 }
 
 // ── Routing (bromfiets only) ──────────────────────────────────────────────────
-async function fetchRoute(destMeta) {
+async function fetchRoute() {
   phase = 'routing'; loading(true);
   closeSugOverlay();
   collapseSheet('home-sheet');
@@ -858,13 +858,13 @@ async function fetchRoute(destMeta) {
     $('rs-time').textContent = Math.round(data.summary.time / 60);
     $('rs-dist').textContent = `· ${data.summary.length.toFixed(1)} km`;
     phase = 'preview';
-    openPreview(destMeta);
+    openPreview();
   } catch(err) {
     toast(err.message); phase = 'idle'; showHomeSheet();
   } finally { loading(false); }
 }
 
-function openPreview(destMeta) {
+function openPreview() {
   paintRoute(route);
   const coords = decodePolyline6(route.shape);
   const bounds = coords.reduce((b,c) => b.extend(c),
@@ -872,26 +872,6 @@ function openPreview(destMeta) {
   map.fitBounds(bounds, { padding:{ top:80,bottom:380,left:48,right:48 }, duration:700 });
   renderSteps(route.maneuvers);
   $('preview-sheet').classList.add('open');
-  // Show save-to-list buttons in search bar area
-  if (destMeta) renderSaveBar(destMeta);
-}
-
-function renderSaveBar(meta) {
-  // Small save chips below search pill — allow saving destination to a list
-  // We reuse the sug-overlay to show a quick save strip
-  $('sug-list').innerHTML = `
-    <div style="padding:14px 16px">
-      <div style="font-size:13px;color:#555;margin-bottom:10px">Save <b style="color:#ccc">${esc(meta.name)}</b> to:</div>
-      <div style="display:flex;gap:8px">
-        ${['wantToGo','favorites','starred'].map(k =>
-          `<button onclick="addToList('${k}',${JSON.stringify(meta).replace(/</g,'\\u003c')});closeSugOverlay();toast('Saved!','info')"
-            style="flex:1;padding:9px 6px;background:#1a1a1a;border:1.5px solid #2a2a2a;border-radius:12px;
-              color:#ccc;font-size:12px;font-weight:700;cursor:pointer"
-          >${ICONS_LIST[k]} ${k==='wantToGo'?'Want to Go':k==='favorites'?'Favorites':'Starred'}</button>`
-        ).join('')}
-      </div>
-    </div>`;
-  $('sug-overlay').classList.add('visible');
 }
 
 function paintRoute(data) {
