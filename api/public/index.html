@@ -634,20 +634,22 @@ function initSearch() {
   input.addEventListener('focus', () => {
     if (phase === 'preview' || phase === 'navigating') { input.blur(); return; }
     over.classList.add('visible');
-    if (input.value.trim().length >= 2) runSearch(input.value.trim());
+    const q = input.value.trim();
+    if (q.length >= 2) runSearch(q);
+    else renderHistory();
   });
 
   input.addEventListener('input', () => {
     const q = input.value.trim();
     clrBtn.classList.toggle('hidden', !q);
     clearTimeout(searchTimer);
-    if (q.length < 2) { $('sug-list').innerHTML = ''; return; }
+    if (q.length < 2) { renderHistory(); return; }
     searchTimer = setTimeout(() => runSearch(q), 280);
   });
 
   clrBtn.addEventListener('click', () => {
     input.value = ''; clrBtn.classList.add('hidden');
-    $('sug-list').innerHTML = ''; input.focus();
+    renderHistory(); input.focus();
   });
 
   map.on('click', () => closeSugOverlay());
@@ -656,6 +658,49 @@ function initSearch() {
 function closeSugOverlay() {
   $('sug-overlay').classList.remove('visible');
   $('q-dest').blur();
+}
+
+// ── Search history ─────────────────────────────────────────────────────────────
+const HISTORY_KEY = 'sr_history';
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(_) { return []; }
+}
+
+function pushHistory(item) {
+  let arr = loadHistory().filter(h => h.placeId !== item.placeId);
+  arr.unshift(item);
+  if (arr.length > 8) arr = arr.slice(0, 8);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(arr));
+}
+
+function renderHistory() {
+  const arr = loadHistory();
+  if (!arr.length) { $('sug-list').innerHTML = ''; return; }
+  $('sug-list').innerHTML =
+    `<div class="sug-item" style="pointer-events:none;opacity:.5">
+       <div class="sug-circle" style="font-size:13px">&#x1F553;</div>
+       <div class="sug-body"><div class="sug-main" style="font-size:13px">Recent</div></div>
+     </div>` +
+    arr.map((h, i) =>
+      `<div class="sug-item sug-hist" data-i="${i}">
+        <div class="sug-circle">&#x1F553;</div>
+        <div class="sug-body">
+          <div class="sug-main">${esc(h.name)}</div>
+          ${h.address ? `<div class="sug-sub">${esc(h.address)}</div>` : ''}
+        </div>
+      </div>`
+    ).join('');
+  $('sug-list').querySelectorAll('.sug-hist').forEach((el, i) => {
+    el.addEventListener('click', () => {
+      const h = arr[i];
+      $('q-dest').value = h.name;
+      $('dest-clear').classList.remove('hidden');
+      closeSugOverlay();
+      map.flyTo({ center: [h.lng, h.lat], zoom: 15, duration: 600 });
+      setEnd({ lat: h.lat, lng: h.lng });
+    });
+  });
 }
 
 async function runSearch(q) {
@@ -698,6 +743,7 @@ function renderSugs(predictions) {
         const res  = await fetch(`${API_BASE}/geocode/details?id=${encodeURIComponent(pred.placeId)}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Could not load location');
+        pushHistory({ placeId: pred.placeId, name: data.name, address: data.address, lat: data.lat, lng: data.lng });
         closeSugOverlay();
         map.flyTo({ center: [data.lng, data.lat], zoom: 15, duration: 600 });
         setEnd({ lat: data.lat, lng: data.lng });
