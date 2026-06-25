@@ -220,28 +220,24 @@
     .saved-empty{font-size:13px;color:#333;padding:12px 0;text-align:center}
     body.light-map .saved-empty{color:#bbb}
 
-    /* ── Profile chips inside preview ────────────────────────────── */
-    #p-row{display:flex;gap:10px;margin-bottom:16px;flex-shrink:0}
-    .p-card{
-      flex:1;border-radius:14px;padding:13px;
-      background:#1a1a1a;border:1.5px solid #222;cursor:pointer;
-      transition:border-color .12s,background .12s;
+    /* ── Route summary (bromfiets only) ──────────────────────────── */
+    #route-summary{
+      display:flex;align-items:center;gap:0;margin-bottom:16px;flex-shrink:0;
+      background:#1a1a1a;border-radius:14px;padding:14px 18px;
+      border:1.5px solid #f59e0b;
     }
-    .p-card.active{border-color:#fff;background:#1e1e1e}
-    body.light-map .p-card{background:#f5f5f5;border-color:#e8e8e8}
-    body.light-map .p-card.active{border-color:#111;background:#eaeaea}
-    .pc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
-    .pc-label{font-size:12px;font-weight:700;color:#666}
-    .pc-speed{font-size:11px;color:#333;font-weight:600}
-    body.light-map .pc-speed{color:#ccc}
-    .pc-time{font-size:27px;font-weight:900;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
-    .pc-time.dim{font-size:18px;color:#333;padding-top:3px}
-    .pc-dist{font-size:12px;color:#444;margin-top:3px}
-    body.light-map .pc-time{color:#111}
-    body.light-map .pc-time.dim{color:#ccc}
-    body.light-map .pc-dist{color:#bbb}
-    .p-card[data-p=snorfiets].active .pc-label{color:#3b82f6}
-    .p-card[data-p=bromfiets].active .pc-label{color:#f59e0b}
+    body.light-map #route-summary{background:#f5f5f5;border-color:#f59e0b}
+    #rs-badge{font-size:11px;font-weight:700;color:#f59e0b;margin-bottom:6px;
+      text-transform:uppercase;letter-spacing:.08em}
+    #rs-time{font-size:36px;font-weight:900;color:#fff;line-height:1;
+      font-variant-numeric:tabular-nums;margin-right:6px}
+    body.light-map #rs-time{color:#111}
+    #rs-unit{font-size:13px;color:#555;align-self:flex-end;padding-bottom:2px;margin-right:16px}
+    body.light-map #rs-unit{color:#aaa}
+    #rs-dist{font-size:16px;font-weight:700;color:#888;align-self:flex-end;padding-bottom:3px}
+    body.light-map #rs-dist{color:#bbb}
+    #rs-left{flex:1}
+    #rs-right{text-align:right}
 
     /* ── Preview sheet ────────────────────────────────────────────── */
     #preview-sheet{
@@ -435,25 +431,17 @@
   <div id="preview-sheet">
     <div id="ps-handle"></div>
     <div id="ps-top">
-      <div id="ps-title">Choose your ride</div>
+      <div id="ps-title">Your route</div>
       <button id="ps-close">&#x2715;&nbsp;New route</button>
     </div>
-    <div id="p-row">
-      <div class="p-card active" data-p="snorfiets">
-        <div class="pc-top">
-          <span class="pc-label">&#x1F535; Snorfiets</span>
-          <span class="pc-speed">25 km/h</span>
+    <div id="route-summary">
+      <div id="rs-left">
+        <div id="rs-badge">&#x1F7E1; Bromfiets &middot; 45 km/h</div>
+        <div style="display:flex;align-items:baseline;gap:4px">
+          <div id="rs-time">&#x2014;</div>
+          <div id="rs-unit">min</div>
+          <div id="rs-dist">&#x2014;</div>
         </div>
-        <div class="pc-time dim" id="snorf-time">&#x2014;</div>
-        <div class="pc-dist" id="snorf-dist">&#x2014;</div>
-      </div>
-      <div class="p-card" data-p="bromfiets">
-        <div class="pc-top">
-          <span class="pc-label">&#x1F7E1; Bromfiets</span>
-          <span class="pc-speed">45 km/h</span>
-        </div>
-        <div class="pc-time dim" id="brom-time">&#x2014;</div>
-        <div class="pc-dist" id="brom-dist">&#x2014;</div>
       </div>
     </div>
     <button id="start-btn">
@@ -500,18 +488,16 @@ const STYLES = {
   day:     'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
   terrain: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
 };
-const COLOR      = { snorfiets: '#3b82f6', bromfiets: '#f59e0b' };
-const AMSTERDAM  = [4.9041, 52.3676];
-const BBOX       = '4.72,52.28,5.08,52.43';
-const PREVIEW_N  = 3;
+const ROUTE_COLOR = '#f59e0b';   // bromfiets amber — only profile
+const AMSTERDAM   = [4.9041, 52.3676];
+const PREVIEW_N   = 3;
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let profile  = 'snorfiets';
 let phase    = 'idle';           // idle | searching | routing | preview | navigating
 let mapMode  = 'night';
 let startLL  = null, endLL = null;
 let markerA  = null, markerB = null;
-let routes   = { snorfiets: null, bromfiets: null };
+let route    = null;
 let navStep  = 0;
 let stepsExp = false;
 let activeList = null;           // which saved-places list chip is open
@@ -638,7 +624,7 @@ function renderSavedSection(key) {
   expandSheet('home-sheet', 'expanded');
 }
 
-// ── Search (Photon) ───────────────────────────────────────────────────────────
+// ── Search (Google Places via server proxy) ───────────────────────────────────
 let searchTimer;
 function initSearch() {
   const input  = $('q-dest');
@@ -656,7 +642,7 @@ function initSearch() {
     clrBtn.classList.toggle('hidden', !q);
     clearTimeout(searchTimer);
     if (q.length < 2) { $('sug-list').innerHTML = ''; return; }
-    searchTimer = setTimeout(() => runSearch(q), 300);
+    searchTimer = setTimeout(() => runSearch(q), 280);
   });
 
   clrBtn.addEventListener('click', () => {
@@ -664,7 +650,6 @@ function initSearch() {
     $('sug-list').innerHTML = ''; input.focus();
   });
 
-  // Close on map click
   map.on('click', () => closeSugOverlay());
 }
 
@@ -676,44 +661,45 @@ function closeSugOverlay() {
 async function runSearch(q) {
   $('sug-list').innerHTML = '<div class="sug-spinner">Searching…</div>';
   try {
-    const url  = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&bbox=${BBOX}&limit=6&lang=nl`;
-    const data = await (await fetch(url)).json();
-    renderSugs(data.features);
-  } catch(_) {
-    $('sug-list').innerHTML = '<div class="sug-spinner">Search unavailable</div>';
+    const res  = await fetch(`${API_BASE}/geocode/suggest?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Search failed');
+    renderSugs(data);
+  } catch(err) {
+    $('sug-list').innerHTML = `<div class="sug-spinner">${esc(err.message)}</div>`;
   }
 }
 
-function renderSugs(features) {
-  if (!features.length) {
+function renderSugs(predictions) {
+  if (!predictions.length) {
     $('sug-list').innerHTML = '<div class="sug-spinner">No results found</div>'; return;
   }
-  // Prepend saved-places quick-save hint row after results
-  $('sug-list').innerHTML = features.map((f,i) => {
-    const p    = f.properties;
-    const name = p.name || p.street || 'Location';
-    const sub  = [p.street!==name?p.street:null, p.housenumber, p.city].filter(Boolean).join(' ');
-    return `<div class="sug-item" data-i="${i}">
+  $('sug-list').innerHTML = predictions.map((p, i) =>
+    `<div class="sug-item" data-i="${i}">
       <div class="sug-circle">&#x1F4CC;</div>
       <div class="sug-body">
-        <div class="sug-main">${esc(name)}</div>
-        ${sub?`<div class="sug-sub">${esc(sub)}</div>`:''}
+        <div class="sug-main">${esc(p.main)}</div>
+        ${p.secondary ? `<div class="sug-sub">${esc(p.secondary)}</div>` : ''}
       </div>
-    </div>`;
-  }).join(`<div id="sug-divider"></div>`);
+    </div>`
+  ).join('');
 
-  $('sug-list').querySelectorAll('.sug-item').forEach((el,i) => {
-    el.addEventListener('click', () => {
-      const f   = features[i];
-      const ll  = { lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0] };
-      const p   = f.properties;
-      const name= p.name || p.street || 'Location';
-      const addr= [p.street!==name?p.street:null,p.housenumber,p.city].filter(Boolean).join(' ');
-      $('q-dest').value = name;
+  $('sug-list').querySelectorAll('.sug-item').forEach((el, i) => {
+    el.addEventListener('click', async () => {
+      const pred = predictions[i];
+      $('q-dest').value = pred.main;
       $('dest-clear').classList.remove('hidden');
-      closeSugOverlay();
-      map.flyTo({ center: [ll.lng, ll.lat], zoom: 15, duration: 600 });
-      setEnd(ll, { name, addr });
+      $('sug-list').innerHTML = '<div class="sug-spinner">Loading…</div>';
+      try {
+        const res  = await fetch(`${API_BASE}/geocode/details?id=${encodeURIComponent(pred.placeId)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not load location');
+        closeSugOverlay();
+        map.flyTo({ center: [data.lng, data.lat], zoom: 15, duration: 600 });
+        setEnd({ lat: data.lat, lng: data.lng }, { name: data.name, addr: data.address });
+      } catch(err) {
+        $('sug-list').innerHTML = `<div class="sug-spinner">${esc(err.message)}</div>`;
+      }
     });
   });
 }
@@ -767,7 +753,7 @@ async function initApp() {
 
   map.on('style.load', () => {
     addRouteLayers();
-    if (routes[profile]) paintRoute(routes[profile]);
+    if (route) paintRoute(route);
   });
 
   // Tap map: set destination when idle/searching, start when no GPS yet
@@ -802,7 +788,7 @@ function addRouteLayers() {
     paint: { 'line-color': mapMode === 'night' ? '#000' : '#fff', 'line-width': 10 } });
   map.addLayer({ id: 'route-fill', type: 'line', source: 'route',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: { 'line-color': COLOR[profile], 'line-width': 5.5 } });
+    paint: { 'line-color': ROUTE_COLOR, 'line-width': 5.5 } });
 }
 
 // ── Layer / mode switching ────────────────────────────────────────────────────
@@ -851,23 +837,22 @@ function setEnd(ll, meta) {
   }
   // If no A marker yet, place it at startLL
   if (!markerA) markerA = placeMarker('A', startLL.lat, startLL.lng);
-  fetchBoth(meta);
+  fetchRoute(meta);
 }
 
-// ── Routing ───────────────────────────────────────────────────────────────────
-async function fetchBoth(destMeta) {
+// ── Routing (bromfiets only) ──────────────────────────────────────────────────
+async function fetchRoute(destMeta) {
   phase = 'routing'; loading(true);
   closeSugOverlay();
   collapseSheet('home-sheet');
   try {
-    const mk = p => fetch(
-      `${API_BASE}/route?profile=${p}&from=${startLL.lat},${startLL.lng}&to=${endLL.lat},${endLL.lng}`);
-    const [sr, br]   = await Promise.all([mk('snorfiets'), mk('bromfiets')]);
-    const [sd, bd]   = await Promise.all([sr.json(), br.json()]);
-    if (!sr.ok) throw new Error(sd.error || 'Route failed');
-    if (!br.ok) throw new Error(bd.error || 'Route failed');
-    routes.snorfiets = sd; routes.bromfiets = bd;
-    fillCard('snorf', sd); fillCard('brom', bd);
+    const res  = await fetch(
+      `${API_BASE}/route?profile=bromfiets&from=${startLL.lat},${startLL.lng}&to=${endLL.lat},${endLL.lng}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Route failed');
+    route = data;
+    $('rs-time').textContent = Math.round(data.summary.time / 60);
+    $('rs-dist').textContent = `· ${data.summary.length.toFixed(1)} km`;
     phase = 'preview';
     openPreview(destMeta);
   } catch(err) {
@@ -875,20 +860,13 @@ async function fetchBoth(destMeta) {
   } finally { loading(false); }
 }
 
-function fillCard(prefix, data) {
-  const t = $(`${prefix}-time`);
-  t.textContent = `${Math.round(data.summary.time/60)} min`;
-  t.classList.remove('dim');
-  $(`${prefix}-dist`).textContent = `${data.summary.length.toFixed(1)} km`;
-}
-
 function openPreview(destMeta) {
-  paintRoute(routes[profile]);
-  const coords = decodePolyline6(routes[profile].shape);
+  paintRoute(route);
+  const coords = decodePolyline6(route.shape);
   const bounds = coords.reduce((b,c) => b.extend(c),
     new maplibregl.LngLatBounds(coords[0],coords[0]));
   map.fitBounds(bounds, { padding:{ top:80,bottom:380,left:48,right:48 }, duration:700 });
-  renderSteps(routes[profile].maneuvers);
+  renderSteps(route.maneuvers);
   $('preview-sheet').classList.add('open');
   // Show save-to-list buttons in search bar area
   if (destMeta) renderSaveBar(destMeta);
@@ -916,12 +894,12 @@ function paintRoute(data) {
   if (!map.getSource('route')) return;
   map.getSource('route').setData({
     type:'Feature', geometry:{ type:'LineString', coordinates:decodePolyline6(data.shape) }});
-  map.setPaintProperty('route-fill',   'line-color', COLOR[profile]);
-  map.setPaintProperty('route-casing', 'line-color',
-    (mapMode==='night')?'#000':'#fff');
+  map.setPaintProperty('route-fill',   'line-color', ROUTE_COLOR);
+  map.setPaintProperty('route-casing', 'line-color', (mapMode==='night')?'#000':'#fff');
 }
 
 function renderSteps(maneuvers) {
+  if (!maneuvers) return;
   const n = stepsExp ? maneuvers.length : Math.min(PREVIEW_N, maneuvers.length);
   $('steps-list').innerHTML = maneuvers.slice(0,n).map(m => {
     const d = m.length<0.1 ? `${Math.round(m.length*1000)} m` : `${m.length.toFixed(1)} km`;
@@ -953,7 +931,7 @@ function startNav() {
 }
 
 function refreshNavCard() {
-  const ms = routes[profile].maneuvers, m = ms[navStep];
+  const ms = route.maneuvers, m = ms[navStep];
   $('nav-arrow').textContent = ICONS[m.type] ?? '↑';
   $('nav-instr').textContent = m.instruction;
   const d = m.length<0.1 ? `${Math.round(m.length*1000)} m` : `${m.length.toFixed(1)} km`;
@@ -962,14 +940,14 @@ function refreshNavCard() {
 }
 
 function refreshNavBar() {
-  const rem = routes[profile].maneuvers.slice(navStep)
+  const rem = route.maneuvers.slice(navStep)
     .reduce((a,m) => ({ time:a.time+m.time, dist:a.dist+m.length }), { time:0, dist:0 });
   $('nav-mins').textContent = Math.max(1, Math.round(rem.time/60));
   $('nav-km').textContent   = rem.dist.toFixed(1);
 }
 
 function advanceStep() {
-  if (navStep < routes[profile].maneuvers.length-1) { navStep++; refreshNavCard(); refreshNavBar(); }
+  if (navStep < route.maneuvers.length-1) { navStep++; refreshNavCard(); refreshNavBar(); }
 }
 
 function endNav() {
@@ -979,7 +957,7 @@ function endNav() {
   $('nav-card').classList.add('hidden');
   $('nav-bar').classList.add('hidden');
   $('preview-sheet').classList.add('open');
-  const coords = decodePolyline6(routes[profile].shape);
+  const coords = decodePolyline6(route.shape);
   const bounds = coords.reduce((b,c) => b.extend(c),
     new maplibregl.LngLatBounds(coords[0],coords[0]));
   map.fitBounds(bounds, { padding:{ top:80,bottom:380,left:48,right:48 }, duration:500 });
@@ -990,10 +968,9 @@ function resetAll() {
   startLL = null; endLL = null;
   markerA?.remove(); markerA = null;
   markerB?.remove(); markerB = null;
-  routes.snorfiets = null; routes.bromfiets = null;
+  route = null;
   stepsExp = false;
-  [$('snorf-time'),$('brom-time')].forEach(el => { el.textContent='—'; el.classList.add('dim'); });
-  [$('snorf-dist'),$('brom-dist')].forEach(el => el.textContent='—');
+  $('rs-time').textContent = '—'; $('rs-dist').textContent = '—';
   $('q-dest').value = ''; $('dest-clear').classList.add('hidden');
   if (map.getSource('route')) map.getSource('route').setData(emptyLine());
   $('preview-sheet').classList.remove('open');
@@ -1071,22 +1048,13 @@ function collapseSheet(id) {
 
 // ── Buttons ───────────────────────────────────────────────────────────────────
 function bindButtons() {
-  // Profile cards
-  document.querySelectorAll('.p-card').forEach(card => {
-    card.addEventListener('click', () => {
-      profile = card.dataset.p;
-      document.querySelectorAll('.p-card').forEach(c => c.classList.toggle('active', c===card));
-      if (routes[profile]) { paintRoute(routes[profile]); renderSteps(routes[profile].maneuvers); }
-    });
-  });
-
   $('start-btn').addEventListener('click', startNav);
   $('end-btn').addEventListener('click', endNav);
   $('ps-close').addEventListener('click', resetAll);
   $('nav-card').addEventListener('click', advanceStep);
   $('more-btn').addEventListener('click', () => {
     stepsExp = !stepsExp;
-    if (routes[profile]) renderSteps(routes[profile].maneuvers);
+    if (route) renderSteps(route.maneuvers);
   });
   $('locate-fab').addEventListener('click', () => {
     geolocate.trigger();
